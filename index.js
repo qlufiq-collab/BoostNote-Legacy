@@ -1,6 +1,23 @@
 const { app } = require('electron')
 const ChildProcess = require('child_process')
 const path = require('path')
+const fs = require('fs')
+
+// Portable mode: if a .portable file exists next to the executable,
+// store user data in a UserData folder alongside the app instead of %APPDATA%.
+// This allows running from a USB stick without admin privileges.
+const portableMarkerPath = path.join(
+  path.dirname(process.execPath),
+  '.portable'
+)
+if (fs.existsSync(portableMarkerPath)) {
+  const portableDataPath = path.join(path.dirname(process.execPath), 'UserData')
+  if (!fs.existsSync(portableDataPath)) {
+    fs.mkdirSync(portableDataPath, { recursive: true })
+  }
+  app.setPath('userData', portableDataPath)
+  app.setPath('appData', portableDataPath)
+}
 
 var error = null
 

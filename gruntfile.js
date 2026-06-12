@@ -235,10 +235,39 @@ module.exports = function(grunt) {
           done()
         })
         break
+      case 'win':
+        var winZipPath =
+          'cd dist && zip -r -q Boostnote-win-portable.zip Boostnote-win32-x64'
+        grunt.log.writeln(winZipPath)
+        ChildProcess.exec(winZipPath, function(err, stdout, stderr) {
+          grunt.log.writeln(stdout)
+          if (err) {
+            grunt.log.writeln(err)
+            grunt.log.writeln(stderr)
+            done(false)
+            return
+          }
+          done()
+        })
+        break
       default:
         done()
         return
     }
+  })
+
+  grunt.registerTask('mark-portable', function(platform) {
+    if (platform !== 'win') {
+      return
+    }
+    var markerPath = path.join(
+      __dirname,
+      'dist',
+      'Boostnote-win32-x64',
+      '.portable'
+    )
+    fs.writeFileSync(markerPath, '', 'utf8')
+    grunt.log.writeln('Created portable marker: ' + markerPath)
   })
 
   function getTarget() {
@@ -293,6 +322,20 @@ module.exports = function(grunt) {
         break
       case 'linux':
         grunt.task.run(['compile', 'pack:linux'])
+    }
+  })
+
+  grunt.registerTask('build-portable', function(platform) {
+    if (platform == null) platform = getTarget()
+
+    switch (platform) {
+      case 'win':
+        grunt.task.run(['compile', 'pack:win', 'mark-portable:win', 'zip:win'])
+        break
+      default:
+        grunt.log.writeln(
+          'Portable build is currently only supported for Windows.'
+        )
     }
   })
 

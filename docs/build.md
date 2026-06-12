@@ -105,3 +105,24 @@ $ grunt build
 ```
 
 > You will find `.deb` and `.rpm` in the `dist` directory.
+
+## Make a portable Windows distribution
+
+A portable Windows build runs from any folder (including a USB stick) without
+requiring administrative privileges or installation. User data is stored in a
+`UserData` folder next to `Boostnote.exe`, so configuration, snippets, and
+storage paths travel with the application.
+
+Run the following on Windows:
+
+```
+grunt build-portable:win
+```
+
+This task compiles the app, packages it for `win32-x64`, drops a `.portable`
+marker file into the package, and produces `dist/Boostnote-win-portable.zip`.
+
+To use the portable build, extract the archive on the target machine and run
+`Boostnote.exe`. As long as the `.portable` marker is present in the same
+directory, all user data is written to the local `UserData` folder instead of
+`%APPDATA%`.
