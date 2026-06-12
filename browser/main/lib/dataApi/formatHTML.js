@@ -763,6 +763,20 @@ body p {
   .clipboardButton {
     display: none
   }
+  pre {
+    display: block;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  pre code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  pre .lineNumber {
+    display: none !important;
+  }
 }
 
 ${allowCustomCSS ? customCSS : ''}
