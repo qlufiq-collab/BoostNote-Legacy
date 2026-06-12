@@ -969,7 +969,7 @@ class SnippetNoteDetail extends React.Component {
           <InfoPanel
             storageName={storageName}
             folderName={folderName}
-            noteLink={`[${note.title}](:note:${
+            noteLink={`[${note.title}](boostnote://open/${
               queryString.parse(location.search).key
             })`}
             updatedAt={formatDate(note.updatedAt)}

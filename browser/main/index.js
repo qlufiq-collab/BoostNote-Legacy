@@ -13,6 +13,7 @@ require('./lib/ipcClient')
 require('../lib/customMeta')
 import i18n from 'browser/lib/i18n'
 import ConfigManager from './lib/ConfigManager'
+import eventEmitter from 'browser/main/lib/eventEmitter'
 
 const electron = require('electron')
 
@@ -171,6 +172,10 @@ ReactDOM.render(
       notify('Update not found!', {
         body: msg
       })
+    })
+
+    ipcRenderer.on('open-note-link', function(event, noteKey) {
+      eventEmitter.emit('list:jump', noteKey)
     })
 
     ipcRenderer.send('update-check', 'check-update')

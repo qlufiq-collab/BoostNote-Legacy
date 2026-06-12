@@ -934,7 +934,7 @@ class NoteList extends React.Component {
   }
 
   copyNoteLink(note) {
-    const noteLink = `[${note.title}](:note:${note.key})`
+    const noteLink = `[${note.title}](boostnote://open/${note.key})`
     return copy(noteLink)
   }
 

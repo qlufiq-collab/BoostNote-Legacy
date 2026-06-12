@@ -835,6 +835,17 @@ class MarkdownPreview extends React.Component {
       return
     }
 
+    // this will match the cross-app note link
+    // e.g.
+    // boostnote://open/1c211eb7dcb463de6490 and
+    // boostnote://open/7dd23275-f2b4-49cb-9e93-3454daf1af9c
+    const regexIsExternalNoteLink = /^boostnote:\/\/open\/([a-zA-Z0-9-]{20,36})\/?$/
+    const externalNoteLinkMatch = rawHref.match(regexIsExternalNoteLink)
+    if (externalNoteLinkMatch) {
+      eventEmitter.emit('list:jump', externalNoteLinkMatch[1])
+      return
+    }
+
     const regexIsLine = /^:line:[0-9]/
     if (regexIsLine.test(linkHash)) {
       const numberPattern = /\d+/g
