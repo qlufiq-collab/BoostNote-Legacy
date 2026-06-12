@@ -162,6 +162,7 @@ class UiTab extends React.Component {
         mermaidHTMLLabel: this.refs.previewMermaidHTMLLabel.checked,
         allowCustomCSS: this.refs.previewAllowCustomCSS.checked,
         lineThroughCheckbox: this.refs.lineThroughCheckbox.checked,
+        floatingToc: this.refs.previewFloatingToc.checked,
         customCSS: this.customCSSCM.getCodeMirror().getValue()
       }
     }
@@ -1142,6 +1143,18 @@ class UiTab extends React.Component {
               />
               &nbsp;
               {i18n.__('When scrolling, synchronize preview with editor')}
+            </label>
+          </div>
+          <div styleName='group-checkBoxSection'>
+            <label>
+              <input
+                onChange={e => this.handleUIChange(e)}
+                checked={this.state.config.preview.floatingToc}
+                ref='previewFloatingToc'
+                type='checkbox'
+              />
+              &nbsp;
+              {i18n.__('Show floating Table of Contents next to the note')}
             </label>
           </div>
           <div styleName='group-checkBoxSection'>

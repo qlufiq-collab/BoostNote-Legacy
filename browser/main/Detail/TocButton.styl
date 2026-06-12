@@ -1,0 +1,33 @@
+.control-tocButton
+  topBarButtonRight()
+  &:hover .tooltip
+    opacity 1
+
+.tooltip
+  tooltip()
+  position absolute
+  pointer-events none
+  top 35px
+  right -10px
+  z-index 200
+  width 100px
+  padding 5px
+  line-height normal
+  border-radius 2px
+  opacity 0
+  transition 0.1s
+
+body[data-theme="dark"]
+  .control-tocButton
+    topBarButtonDark()
+
+apply-theme(theme)
+  body[data-theme={theme}]
+    .control-tocButton
+      topBarButtonDark()
+
+for theme in 'solarized-dark' 'dracula'
+  apply-theme(theme)
+
+for theme in $themes
+  apply-theme(theme)

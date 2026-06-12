@@ -23,6 +23,7 @@ import RestoreButton from './RestoreButton'
 import PermanentDeleteButton from './PermanentDeleteButton'
 import InfoButton from './InfoButton'
 import ToggleModeButton from './ToggleModeButton'
+import TocButton from './TocButton'
 import InfoPanel from './InfoPanel'
 import InfoPanelTrashed from './InfoPanelTrashed'
 import { formatDate } from 'browser/lib/date-formatter'
@@ -30,6 +31,8 @@ import { getTodoPercentageOfCompleted } from 'browser/lib/getTodoStatus'
 import striptags from 'striptags'
 import { confirmDeleteNote } from 'browser/lib/confirmDeleteNote'
 import markdownToc from 'browser/lib/markdown-toc-generator'
+import FloatingToc from 'browser/components/FloatingToc'
+import i18n from 'browser/lib/i18n'
 import queryString from 'query-string'
 import { replace } from 'connected-react-router'
 import ToggleDirectionButton from 'browser/main/Detail/ToggleDirectionButton'
@@ -52,7 +55,8 @@ class MarkdownNoteDetail extends React.Component {
       isLocked: false,
       editorType: props.config.editor.type,
       switchPreview: props.config.editor.switchPreview,
-      RTL: false
+      RTL: false,
+      showFloatingToc: props.config.preview.floatingToc
     }
 
     this.dispatchTimer = null
@@ -368,6 +372,42 @@ class MarkdownNoteDetail extends React.Component {
     markdownToc.generateInEditor(editor)
   }
 
+  handleToggleFloatingToc() {
+    const newValue = !this.state.showFloatingToc
+    this.setState({ showFloatingToc: newValue }, () => {
+      const newConfig = Object.assign({}, this.props.config)
+      newConfig.preview = Object.assign({}, newConfig.preview, {
+        floatingToc: newValue
+      })
+      ConfigManager.set(newConfig)
+    })
+  }
+
+  handleFloatingTocJump(slug) {
+    const preview = this.getPreviewComponent()
+    if (!preview) return
+    const win = preview.getWindow()
+    if (!win) return
+
+    const targetId = encodeURI(slug)
+    const target =
+      win.document.getElementById(targetId) || win.document.getElementById(slug)
+    if (target == null) return
+
+    if (typeof preview.scrollTo === 'function') {
+      preview.scrollTo(0, target.offsetTop)
+    }
+  }
+
+  getPreviewComponent() {
+    const content = this.refs.content
+    if (!content) return null
+    if (this.state.editorType === 'SPLIT') {
+      return content.refs && content.refs.preview
+    }
+    return content.previewRef ? content.previewRef.current : null
+  }
+
   handleFocus(e) {
     this.focus()
   }
@@ -568,6 +608,10 @@ class MarkdownNoteDetail extends React.Component {
             onClick={e => this.handleSwitchMode(e)}
             editorType={editorType}
           />
+          <TocButton
+            onClick={() => this.handleToggleFloatingToc()}
+            isActive={this.state.showFloatingToc}
+          />
           {this.props.config.editor.rtlEnabled && (
             <ToggleDirectionButton
               onClick={e => this.handleSwitchDirection(e)}
@@ -635,7 +679,17 @@ class MarkdownNoteDetail extends React.Component {
       >
         {location.pathname === '/trashed' ? trashTopBar : detailTopBar}
 
-        <div styleName='body'>{this.renderEditor()}</div>
+        <div styleName='body'>
+          <div styleName='body-editor'>{this.renderEditor()}</div>
+          {this.state.showFloatingToc && (
+            <FloatingToc
+              value={note.content}
+              title={i18n.__('Table of Contents')}
+              emptyLabel={i18n.__('No headings')}
+              onJump={slug => this.handleFloatingTocJump(slug)}
+            />
+          )}
+        </div>
 
         <StatusBar
           {..._.pick(this.props, ['config', 'location', 'dispatch'])}
