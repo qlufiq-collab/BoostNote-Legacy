@@ -39,6 +39,7 @@ import { push } from 'connected-react-router'
 import ConfigManager from '../main/lib/ConfigManager'
 import uiThemes from 'browser/lib/ui-themes'
 import { buildMarkdownPreviewContextMenu } from 'browser/lib/contextMenuBuilder'
+import { addMarkdownFolding } from 'browser/lib/markdownFolding'
 
 const dialog = remote.dialog
 
@@ -467,6 +468,7 @@ class MarkdownPreview extends React.Component {
       renderedHTML,
       storagePath
     )
+    addMarkdownFolding(this.refs.root.contentWindow.document.body)
     _.forEach(
       this.refs.root.contentWindow.document.querySelectorAll(
         'input[type="checkbox"]'

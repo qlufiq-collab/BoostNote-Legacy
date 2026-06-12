@@ -129,6 +129,19 @@ h1, h2, h3, h4, h5, h6
   font-weight bold
   word-wrap break-word
   padding .2em 0 .2em
+  &.fold-header
+    cursor pointer
+    &:before
+      content '\25be'
+      display inline-block
+      width .8em
+      margin-left -.8em
+      color inactiveTextColor
+      transition transform .1s ease-in-out
+    &.fold-collapsed:before
+      transform rotate(-90deg)
+.fold-hidden
+  display none
 h1
   font-size 2.55em
   line-height 1.2
