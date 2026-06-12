@@ -3,6 +3,9 @@
   "productName": "Boostnote",
   "version": "0.16.1",
   "main": "index.js",
+  "bin": {
+    "boostnote": "bin/cli.js"
+  },
   "description": "Boostnote",
   "license": "GPL-3.0",
   "scripts": {
@@ -14,7 +17,8 @@
     "fix": "eslint . --fix",
     "lint": "eslint .",
     "dev": "cross-env NODE_ENV=development node dev-scripts/dev.js",
-    "watch": "webpack-dev-server --hot"
+    "watch": "webpack-dev-server --hot",
+    "cli": "node bin/cli.js"
   },
   "config": {
     "electron-version": "4.2.12"
