@@ -353,6 +353,7 @@ class MarkdownPreview extends React.Component {
     eventEmitter.off('export:save-html', this.saveAsHtmlHandler)
     eventEmitter.off('export:save-pdf', this.saveAsPdfHandler)
     eventEmitter.off('print', this.printHandler)
+    this.closeNotePopup()
   }
 
   componentDidUpdate(prevProps) {
@@ -791,6 +792,86 @@ class MarkdownPreview extends React.Component {
     return new window.Notification(title, options)
   }
 
+  findLinkedNote(noteHash) {
+    const { data } = this.props
+    if (!data || !data.noteMap) return null
+    if (typeof data.noteMap.get === 'function') {
+      const direct = data.noteMap.get(noteHash)
+      if (direct) return direct
+    }
+    let match = null
+    if (typeof data.noteMap.forEach === 'function') {
+      data.noteMap.forEach((note, key) => {
+        if (match) return
+        if (key === noteHash || (note && note.key === noteHash)) {
+          match = note
+        }
+      })
+    }
+    return match
+  }
+
+  openNotePopup(noteHash) {
+    const note = this.findLinkedNote(noteHash)
+    if (!note || note.type !== 'MARKDOWN_NOTE') return false
+
+    this.closeNotePopup()
+
+    const iframeDoc = this.refs.root.contentWindow.document
+    const isDark = uiThemes.some(
+      item => item.name === this.props.theme && item.isDark
+    )
+
+    const overlay = iframeDoc.createElement('div')
+    overlay.className = 'linked-note-popup-overlay'
+    overlay.style.cssText =
+      'position:fixed;top:0;left:0;width:100%;height:100%;' +
+      'background:rgba(0,0,0,0.25);z-index:1000;' +
+      'display:flex;align-items:flex-start;justify-content:center;' +
+      'padding:48px 24px;box-sizing:border-box;overflow:auto;'
+
+    const popup = iframeDoc.createElement('div')
+    popup.className = 'linked-note-popup'
+    popup.style.cssText =
+      'max-width:720px;width:100%;max-height:100%;overflow:auto;' +
+      'padding:20px 28px;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,0.25);' +
+      'background:' +
+      (isDark ? '#2c3033' : '#ffffff') +
+      ';color:' +
+      (isDark ? '#dddddd' : '#222222') +
+      ';font-family:inherit;line-height:1.5;'
+
+    if (note.title) {
+      const titleEl = iframeDoc.createElement('h2')
+      titleEl.className = 'linked-note-popup-title'
+      titleEl.style.cssText = 'margin:0 0 12px 0;font-size:18px;'
+      titleEl.textContent = note.title
+      popup.appendChild(titleEl)
+    }
+
+    const body = iframeDoc.createElement('div')
+    body.className = 'linked-note-popup-body'
+    body.innerHTML = this.markdown.render(note.content || '')
+    popup.appendChild(body)
+
+    // Clicks inside the popup itself should not dismiss it.
+    popup.addEventListener('click', ev => ev.stopPropagation())
+    popup.addEventListener('mousedown', ev => ev.stopPropagation())
+
+    overlay.addEventListener('click', () => this.closeNotePopup())
+
+    iframeDoc.body.appendChild(overlay)
+    this.notePopupOverlay = overlay
+    return true
+  }
+
+  closeNotePopup() {
+    if (this.notePopupOverlay && this.notePopupOverlay.parentNode) {
+      this.notePopupOverlay.parentNode.removeChild(this.notePopupOverlay)
+    }
+    this.notePopupOverlay = null
+  }
+
   handleLinkClick(e) {
     e.preventDefault()
     e.stopPropagation()
@@ -831,7 +912,14 @@ class MarkdownPreview extends React.Component {
     // :note:7dd23275-f2b4-49cb-9e93-3454daf1af9c
     const regexIsNoteLink = /^:note:([a-zA-Z0-9-]{20,36})$/
     if (regexIsNoteLink.test(linkHash)) {
-      eventEmitter.emit('list:jump', linkHash.replace(':note:', ''))
+      const noteHash = linkHash.replace(':note:', '')
+      if (
+        ConfigManager.get().preview.openLinkedNoteInPopup &&
+        this.openNotePopup(noteHash, e)
+      ) {
+        return
+      }
+      eventEmitter.emit('list:jump', noteHash)
       return
     }
 
@@ -849,7 +937,14 @@ class MarkdownPreview extends React.Component {
     // 877f99c3268608328037-1c211eb7dcb463de6490
     const regexIsLegacyNoteLink = /^(.{20})-(.{20})$/
     if (regexIsLegacyNoteLink.test(linkHash)) {
-      eventEmitter.emit('list:jump', linkHash.split('-')[1])
+      const noteHash = linkHash.split('-')[1]
+      if (
+        ConfigManager.get().preview.openLinkedNoteInPopup &&
+        this.openNotePopup(noteHash)
+      ) {
+        return
+      }
+      eventEmitter.emit('list:jump', noteHash)
       return
     }
 
@@ -902,11 +997,12 @@ MarkdownPreview.propTypes = {
   storagePath: PropTypes.string,
   smartQuotes: PropTypes.bool,
   smartArrows: PropTypes.bool,
-  breaks: PropTypes.bool
+  breaks: PropTypes.bool,
+  data: PropTypes.object
 }
 
 export default connect(
-  null,
+  ({ data }) => ({ data }),
   null,
   null,
   { forwardRef: true }

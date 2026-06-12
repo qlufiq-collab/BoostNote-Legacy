@@ -134,7 +134,8 @@ export const DEFAULT_CONFIG = {
     customCSS: DEFAULT_CSS_CONFIG,
     sanitize: 'STRICT', // 'STRICT', 'ALLOW_STYLES', 'NONE'
     mermaidHTMLLabel: false,
-    lineThroughCheckbox: true
+    lineThroughCheckbox: true,
+    openLinkedNoteInPopup: false
   },
   blog: {
     type: 'wordpress', // Available value: wordpress, add more types in the future plz

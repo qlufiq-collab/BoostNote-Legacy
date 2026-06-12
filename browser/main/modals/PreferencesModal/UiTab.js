@@ -162,6 +162,7 @@ class UiTab extends React.Component {
         mermaidHTMLLabel: this.refs.previewMermaidHTMLLabel.checked,
         allowCustomCSS: this.refs.previewAllowCustomCSS.checked,
         lineThroughCheckbox: this.refs.lineThroughCheckbox.checked,
+        openLinkedNoteInPopup: this.refs.previewOpenLinkedNoteInPopup.checked,
         customCSS: this.customCSSCM.getCodeMirror().getValue()
       }
     }
@@ -1118,6 +1119,18 @@ class UiTab extends React.Component {
               />
               &nbsp;
               {i18n.__('Allow line through checkbox')}
+            </label>
+          </div>
+          <div styleName='group-checkBoxSection'>
+            <label>
+              <input
+                onChange={e => this.handleUIChange(e)}
+                checked={this.state.config.preview.openLinkedNoteInPopup}
+                ref='previewOpenLinkedNoteInPopup'
+                type='checkbox'
+              />
+              &nbsp;
+              {i18n.__('Open linked notes in a popup window')}
             </label>
           </div>
           <div styleName='group-checkBoxSection'>
