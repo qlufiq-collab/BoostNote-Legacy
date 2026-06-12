@@ -19,6 +19,7 @@ class NewNoteButton extends React.Component {
     super(props)
 
     this.state = {}
+    this.newNoteButtonLock = false
 
     this.handleNewNoteButtonClick = this.handleNewNoteButtonClick.bind(this)
   }
@@ -39,6 +40,10 @@ class NewNoteButton extends React.Component {
       config
     } = this.props
     const { storage, folder } = this.resolveTargetFolder()
+    if (this.newNoteButtonLock) {
+      return
+    }
+    this.newNoteButtonLock = true
     if (config.ui.defaultNote === 'MARKDOWN_NOTE') {
       createMarkdownNote(
         storage.key,
@@ -47,7 +52,9 @@ class NewNoteButton extends React.Component {
         location,
         params,
         config
-      )
+      ).then(() => {
+        this.newNoteButtonLock = false
+      })
     } else if (config.ui.defaultNote === 'SNIPPET_NOTE') {
       createSnippetNote(
         storage.key,
@@ -56,7 +63,9 @@ class NewNoteButton extends React.Component {
         location,
         params,
         config
-      )
+      ).then(() => {
+        this.newNoteButtonLock = false
+      })
     } else {
       modal.open(NewNoteModal, {
         storage: storage.key,
@@ -66,6 +75,7 @@ class NewNoteButton extends React.Component {
         params,
         config
       })
+      this.newNoteButtonLock = false
     }
   }
 
